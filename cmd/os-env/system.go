@@ -4,6 +4,7 @@
 package osenv
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -49,6 +50,9 @@ func newSystemLocaleCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			loc, err := system.GetLocale()
 			if err != nil {
+				if errors.Is(err, system.ErrLocaleUnsupported) {
+					return fmt.Errorf("locale is not supported on this platform yet")
+				}
 				return err
 			}
 			_, err = fmt.Fprintln(cmd.OutOrStdout(), loc)
