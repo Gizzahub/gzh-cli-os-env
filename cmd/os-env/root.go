@@ -28,6 +28,7 @@ Examples:
 
 	cmd.AddCommand(newDetectCmd())
 	cmd.AddCommand(newPowerCmd())
+	cmd.AddCommand(newSystemCmd())
 
 	return cmd
 }
