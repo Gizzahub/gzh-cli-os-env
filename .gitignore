@@ -1,0 +1,13 @@
+# Binaries
+*.exe
+/os-env
+
+# Test / coverage
+coverage.out
+coverage.html
+*.test
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
