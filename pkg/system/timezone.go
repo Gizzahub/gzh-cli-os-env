@@ -4,6 +4,7 @@
 package system
 
 import (
+	"context"
 	"os/exec"
 	"strings"
 )
@@ -30,8 +31,9 @@ func ParseTimezoneLink(link string) string {
 }
 
 // GetTimezone resolves the current timezone via /etc/localtime on macOS.
-func GetTimezone() (string, error) {
-	out, err := exec.Command("readlink", "/etc/localtime").Output()
+// Canceling ctx aborts the underlying platform query.
+func GetTimezone(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(ctx, "readlink", "/etc/localtime").Output()
 	if err != nil {
 		return "", err
 	}

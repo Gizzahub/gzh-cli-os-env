@@ -4,6 +4,7 @@
 package system
 
 import (
+	"context"
 	"errors"
 	"os/exec"
 	"runtime"
@@ -15,17 +16,18 @@ var ErrLocaleUnsupported = errors.New("system: locale query unsupported on this 
 
 // GetLocale returns the user's locale identifier. On macOS it reads
 // `defaults read .GlobalPreferences AppleLocale` (e.g. "ko_KR").
-func GetLocale() (string, error) {
+// Canceling ctx aborts the underlying platform query.
+func GetLocale(ctx context.Context) (string, error) {
 	switch runtime.GOOS {
 	case "darwin":
-		return getLocaleMacOS()
+		return getLocaleMacOS(ctx)
 	default:
 		return "", ErrLocaleUnsupported
 	}
 }
 
-func getLocaleMacOS() (string, error) {
-	out, err := exec.Command("defaults", "read", ".GlobalPreferences", "AppleLocale").Output()
+func getLocaleMacOS(ctx context.Context) (string, error) {
+	out, err := exec.CommandContext(ctx, "defaults", "read", ".GlobalPreferences", "AppleLocale").Output()
 	if err != nil {
 		return "", err
 	}

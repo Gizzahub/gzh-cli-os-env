@@ -43,6 +43,8 @@ func ParseHosts(content string) ([]HostsEntry, error) {
 
 // GetHosts reads and parses the system hosts file (path).
 func GetHosts(path string) ([]HostsEntry, error) {
+	// #nosec G304 -- reading a caller-chosen path is this function's contract;
+	// the caller, not this package, decides which hosts file to inspect.
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err

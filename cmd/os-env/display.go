@@ -30,7 +30,7 @@ On macOS this reads system_profiler SPDisplaysDataType. Other platforms are
 not yet supported.`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			items, err := display.List()
+			items, err := display.List(cmd.Context())
 			if err != nil {
 				if errors.Is(err, display.ErrUnsupported) {
 					return fmt.Errorf("display list is not supported on this platform yet")

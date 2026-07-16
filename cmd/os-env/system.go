@@ -48,7 +48,7 @@ func newSystemLocaleCmd() *cobra.Command {
 		Short: "Show the current locale",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			loc, err := system.GetLocale()
+			loc, err := system.GetLocale(cmd.Context())
 			if err != nil {
 				if errors.Is(err, system.ErrLocaleUnsupported) {
 					return fmt.Errorf("locale is not supported on this platform yet")
@@ -67,7 +67,7 @@ func newSystemTimezoneCmd() *cobra.Command {
 		Short: "Show the current timezone",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			tz, err := system.GetTimezone()
+			tz, err := system.GetTimezone(cmd.Context())
 			if err != nil {
 				return err
 			}

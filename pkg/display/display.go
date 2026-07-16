@@ -6,6 +6,7 @@
 package display
 
 import (
+	"context"
 	"errors"
 	"os/exec"
 	"regexp"
@@ -83,17 +84,18 @@ func ParseSystemProfilerDisplays(output string) []Info {
 }
 
 // List returns connected displays for the current platform.
-func List() ([]Info, error) {
+// Canceling ctx aborts the underlying platform query.
+func List(ctx context.Context) ([]Info, error) {
 	switch runtime.GOOS {
 	case "darwin":
-		return listMacOS()
+		return listMacOS(ctx)
 	default:
 		return nil, ErrUnsupported
 	}
 }
 
-func listMacOS() ([]Info, error) {
-	out, err := exec.Command("system_profiler", "SPDisplaysDataType").Output()
+func listMacOS(ctx context.Context) ([]Info, error) {
+	out, err := exec.CommandContext(ctx, "system_profiler", "SPDisplaysDataType").Output()
 	if err != nil {
 		return nil, err
 	}

@@ -1,1 +1,245 @@
+# golangci-lint configuration (v2)
+# Standard configuration for gzh-cli-* projects
+
 version: "2"
+
+run:
+  go: "1.26"
+  modules-download-mode: readonly
+  issues-exit-code: 1
+  tests: true
+
+linters:
+  default: none
+  enable:
+    # Error handling
+    - errcheck
+    - errorlint
+    - nilerr
+    - nilnil
+
+    # Security
+    - gosec
+
+    # Code quality
+    - bodyclose
+    - contextcheck
+    - durationcheck
+    - forcetypeassert
+    - goconst
+    - gocritic
+    - gocyclo
+    - gocognit
+    - godot
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - noctx
+    - prealloc
+    - revive
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+    # Struct tags
+    - tagliatelle
+
+    # Maintainability
+    - maintidx
+
+    # Optional: Header enforcement (uncomment to enable)
+    # - goheader
+
+  settings:
+    depguard:
+      rules:
+        main:
+          deny:
+            - pkg: github.com/pkg/errors
+              desc: Use stdlib errors instead
+            - pkg: io/ioutil
+              desc: Deprecated. Use io or os package instead
+
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+      exclude-functions:
+        - fmt.Print
+        - fmt.Println
+        - fmt.Printf
+        - fmt.Fprint
+        - fmt.Fprintf
+        - fmt.Fprintln
+        - (*os.File).Close
+
+    errorlint:
+      errorf: true
+      asserts: true
+      comparison: true
+
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+      # Tests assert user-facing command names ("detect", ...) as literals on
+      # purpose: comparing against a shared constant would pass even if the
+      # constant's value changed, which is exactly what the test must catch.
+      ignore-tests: true
+
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - style
+        - performance
+        - experimental
+        - opinionated
+      disabled-checks:
+        - hugeParam
+        - rangeValCopy
+
+    gocognit:
+      min-complexity: 30
+
+    gocyclo:
+      min-complexity: 25
+
+    godot:
+      scope: declarations
+      exclude:
+        - ^TODO
+        - ^FIXME
+        - ^NOTE
+
+    # Uncomment to enable header enforcement
+    # goheader:
+    #   values:
+    #     const:
+    #       COMPANY: YourCompany
+    #       LICENSE: MIT
+    #   template: |-
+    #     Copyright (c) {{ YEAR }} {{ COMPANY }}
+    #     SPDX-License-Identifier: {{ LICENSE }}
+
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+        - shadow
+
+    maintidx:
+      under: 20
+
+    misspell:
+      locale: US
+
+    nakedret:
+      max-func-lines: 30
+
+    prealloc:
+      simple: true
+      range-loops: true
+      for-loops: true
+
+    revive:
+      rules:
+        - name: blank-imports
+          disabled: false
+        - name: context-as-argument
+          disabled: false
+        - name: context-keys-type
+          disabled: false
+        - name: dot-imports
+          disabled: false
+        - name: error-return
+          disabled: false
+        - name: error-strings
+          disabled: false
+        - name: error-naming
+          disabled: false
+        - name: exported
+          disabled: false
+        - name: increment-decrement
+          disabled: false
+        - name: indent-error-flow
+          disabled: false
+        - name: var-naming
+          disabled: false
+        - name: receiver-naming
+          disabled: false
+        - name: package-comments
+          disabled: true
+        - name: unreachable-code
+          disabled: false
+
+    staticcheck:
+      checks:
+        - all
+
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+          yaml: camel
+          xml: camel
+        use-field-name: true
+
+    unparam:
+      check-exported: false
+
+  exclusions:
+    generated: lax
+    rules:
+      # Relax rules for test files
+      - linters:
+          - errcheck
+          - gosec
+          - gocritic
+          - gocognit
+          - gocyclo
+          - maintidx
+          - tagliatelle
+        path: _test\.go
+
+      # Exclude generated files
+      - linters:
+          - all
+        path: .*\.pb\.go$
+
+      - linters:
+          - all
+        path: .*\.gen\.go$
+
+      # Common exclusions
+      - linters:
+          - errcheck
+        text: Error return value of.*Close.*is not checked
+
+      - linters:
+          - errcheck
+        text: Error return value of.*Flush.*is not checked
+
+      # Exclude goheader for test files
+      - linters:
+          - goheader
+        path: _test\.go
+
+    paths:
+      - vendor
+      - .git
+      - tmp
+      - third_party$
+      - examples$
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10
+  new: false
+
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - examples$

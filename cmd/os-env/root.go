@@ -1,6 +1,9 @@
 // Copyright (c) 2026 Archmagece
 // SPDX-License-Identifier: MIT
 
+// Package osenv provides the os-env command tree for managing OS and desktop
+// environment settings. NewRootCmd is the entry point for both the standalone
+// binary and parent CLIs that wrap it.
 package osenv
 
 import "github.com/spf13/cobra"

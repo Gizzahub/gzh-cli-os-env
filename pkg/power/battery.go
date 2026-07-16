@@ -7,6 +7,7 @@
 package power
 
 import (
+	"context"
 	"errors"
 	"os/exec"
 	"regexp"
@@ -57,18 +58,19 @@ func ParseBatteryOutput(output string) (BatteryStatus, error) {
 }
 
 // GetBattery returns the current battery status, dispatching by platform.
-func GetBattery() (BatteryStatus, error) {
+// Canceling ctx aborts the underlying platform query.
+func GetBattery(ctx context.Context) (BatteryStatus, error) {
 	switch runtime.GOOS {
 	case "darwin":
-		return getBatteryMacOS()
+		return getBatteryMacOS(ctx)
 	default:
 		return BatteryStatus{}, ErrUnsupported
 	}
 }
 
 // getBatteryMacOS shells out to `pmset -g batt`.
-func getBatteryMacOS() (BatteryStatus, error) {
-	out, err := exec.Command("pmset", "-g", "batt").Output()
+func getBatteryMacOS(ctx context.Context) (BatteryStatus, error) {
+	out, err := exec.CommandContext(ctx, "pmset", "-g", "batt").Output()
 	if err != nil {
 		return BatteryStatus{}, err
 	}

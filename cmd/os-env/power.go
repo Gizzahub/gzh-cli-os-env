@@ -29,7 +29,7 @@ func newBatteryCmd() *cobra.Command {
 On macOS this reads ` + "`pmset -g batt`" + `. Other platforms are not yet supported.`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			status, err := power.GetBattery()
+			status, err := power.GetBattery(cmd.Context())
 			if err != nil {
 				if errors.Is(err, power.ErrUnsupported) {
 					return fmt.Errorf("battery status is not supported on this platform yet")
