@@ -33,6 +33,8 @@ Examples:
 	cmd.AddCommand(newPowerCmd())
 	cmd.AddCommand(newSystemCmd())
 	cmd.AddCommand(newDisplayCmd())
+	cmd.AddCommand(newShortcutsCmd())
+	cmd.AddCommand(newInputCmd())
 
 	return cmd
 }

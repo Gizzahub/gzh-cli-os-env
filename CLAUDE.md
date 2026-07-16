@@ -14,12 +14,15 @@ make check     # fmt + lint + test
 
 ```
 gzh-cli-os-env/
-├── cmd/os-env/          # CLI entry point (NewRootCmd) + detect/power/system/display
+├── cmd/os-env/          # CLI entry point (NewRootCmd)
+│                        # detect/power/system/display/shortcuts/input
 └── pkg/
     ├── detector/        # OS / desktop environment detection
     ├── power/           # Battery status (pure parser + macOS dispatch)
     ├── system/          # hosts / locale / timezone
-    └── display/         # Display list (pure parser + macOS dispatch)
+    ├── display/         # Display list (pure parser + macOS dispatch)
+    ├── shortcuts/       # Symbolic hotkeys (pure parser + macOS dispatch)
+    └── input/           # Keyboard repeat / input sources (pure parser + dispatch)
 ```
 
 ## Key API
@@ -39,8 +42,8 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 | System (hosts) | ✅ | ✅ | ✅ | planned |
 | System (locale/timezone) | planned | planned | ✅ | planned |
 | Display | planned | planned | ✅ | planned |
-| Shortcuts | planned | planned | planned | planned |
-| Input | planned | planned | planned | planned |
+| Shortcuts | planned | planned | ✅ | planned |
+| Input (keyboard) | planned | planned | ✅ | planned |
 
 ## Module
 
@@ -48,7 +51,7 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 
 ## Status
 
-**Rebuild in progress.** Implemented: detection, battery (macOS),
-system hosts/locale/timezone, display list (macOS). Remaining — Shortcuts,
-Input, Backup/Sync, non-macOS backends. See `tasks/plan/GZH_CLI_OS_ENV.md`
+**Rebuild in progress.** macOS read paths are complete: detection, battery,
+system hosts/locale/timezone, display list, shortcuts, input keyboard.
+Remaining — Backup/Sync, non-macOS backends. See `tasks/plan/GZH_CLI_OS_ENV.md`
 and `tasks/doing/P2-os-env-rebuild-continue.md` in gzh-cli-devbox.

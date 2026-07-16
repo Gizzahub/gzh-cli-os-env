@@ -44,13 +44,14 @@ G1. **Environment detection** (Phase 1 — 완료)
 G2. **Domain coverage** (설계문서 6개 영역)
 
 - Target: detect · power · system · display · shortcuts · input = 6/6
-- 현재 **4/6** — Shortcuts·Input 미착수 (Phase 3 잔여)
+- 현재 **6/6** — Phase 3에서 Shortcuts·Input 추가. 단, 커버리지는 "도메인이
+  존재한다"는 뜻이며 플랫폼 완비는 G3이 따로 센다
 
 G3. **Platform backends**
 
 - Target: 각 도메인의 macOS·Linux(KDE/GNOME)·Windows 백엔드 완비
-- 현재 **macOS 우선 구현**. Power·Display·locale/timezone은 macOS만 동작하고
-  그 외는 `ErrUnsupported`; Linux는 Phase 4, Windows는 Phase 5
+- 현재 **macOS 우선 구현**. Power·Display·locale/timezone·Shortcuts·Input은
+  macOS만 동작하고 그 외는 `ErrUnsupported`; Linux는 Phase 4, Windows는 Phase 5
 
 G4. **Pure-function separation**
 
