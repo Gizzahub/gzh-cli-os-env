@@ -14,13 +14,12 @@ make check     # fmt + lint + test
 
 ```
 gzh-cli-os-env/
-├── cmd/os-env/          # CLI entry point (NewRootCmd)
-│   ├── root.go          # NewRootCmd() — used by gzh-cli wrapper
-│   └── detect.go        # detect subcommand
+├── cmd/os-env/          # CLI entry point (NewRootCmd) + detect/power/system/display
 └── pkg/
-    └── detector/        # OS / desktop environment detection
-        ├── detector.go
-        └── detector_test.go
+    ├── detector/        # OS / desktop environment detection
+    ├── power/           # Battery status (pure parser + macOS dispatch)
+    ├── system/          # hosts / locale / timezone
+    └── display/         # Display list (pure parser + macOS dispatch)
 ```
 
 ## Key API
@@ -36,11 +35,12 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 | Feature | KDE Plasma | GNOME | macOS | Windows |
 |---------|------------|-------|-------|---------|
 | Detection | ✅ | ✅ | ✅ | ✅ |
-| Power | planned | planned | planned | planned |
+| Power | planned | planned | ✅ | planned |
+| System (hosts) | ✅ | ✅ | ✅ | planned |
+| System (locale/timezone) | planned | planned | ✅ | planned |
+| Display | planned | planned | ✅ | planned |
 | Shortcuts | planned | planned | planned | planned |
-| Display | planned | planned | planned | planned |
 | Input | planned | planned | planned | planned |
-| System | planned | planned | planned | planned |
 
 ## Module
 
@@ -48,6 +48,7 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 
 ## Status
 
-**Phase 1 (scaffolding + detection).** Full feature set — Power, Shortcuts,
-Display, Input, System, Backup/Sync — arrives in later phases. See
-`tasks/plan/GZH_CLI_OS_ENV.md` in gzh-cli-devbox for the roadmap.
+**Rebuild in progress.** Implemented: detection, battery (macOS),
+system hosts/locale/timezone, display list (macOS). Remaining — Shortcuts,
+Input, Backup/Sync, non-macOS backends. See `tasks/plan/GZH_CLI_OS_ENV.md`
+and `tasks/doing/P2-os-env-rebuild-continue.md` in gzh-cli-devbox.
