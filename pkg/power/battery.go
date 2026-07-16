@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Archmagece
+// Copyright (c) 2026 Gizzahub
 // SPDX-License-Identifier: MIT
 
 // Package power reports power and battery status. Phase 2 covers battery

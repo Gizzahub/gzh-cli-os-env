@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Archmagece
+// Copyright (c) 2026 Gizzahub
 // SPDX-License-Identifier: MIT
 
 // Package shortcuts reports keyboard shortcuts. Phase 3 covers macOS via

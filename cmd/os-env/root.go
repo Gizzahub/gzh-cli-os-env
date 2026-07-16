@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Archmagece
+// Copyright (c) 2026 Gizzahub
 // SPDX-License-Identifier: MIT
 
 // Package osenv provides the os-env command tree for managing OS and desktop
