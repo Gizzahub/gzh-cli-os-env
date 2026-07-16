@@ -7,9 +7,9 @@ import "testing"
 
 func TestParseTimezoneLink_Zoneinfo(t *testing.T) {
 	cases := map[string]string{
-		"/var/db/timezone/zoneinfo/Asia/Seoul":            "Asia/Seoul",
-		"/var/db/timezone/zoneinfo/America/New_York":      "America/New_York",
-		"  /var/db/timezone/zoneinfo/Europe/London  \n":   "Europe/London",
+		"/var/db/timezone/zoneinfo/Asia/Seoul":          "Asia/Seoul",
+		"/var/db/timezone/zoneinfo/America/New_York":    "America/New_York",
+		"  /var/db/timezone/zoneinfo/Europe/London  \n": "Europe/London",
 	}
 	for in, want := range cases {
 		if got := ParseTimezoneLink(in); got != want {

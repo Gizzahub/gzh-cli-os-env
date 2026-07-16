@@ -26,11 +26,11 @@ func TestDetect(t *testing.T) {
 
 func TestDetectLinuxDesktopKnownValues(t *testing.T) {
 	cases := map[string]string{
-		"KDE Plasma":      "plasma-kde",
-		"Kubuntu":         "kxsession",
-		"GNOME":           "gnome",
-		"Ubuntu (GNOME)":  "ubuntu:GNOME",
-		"Pop!_OS":         "pop:GNOME",
+		"KDE Plasma":     "plasma-kde",
+		"Kubuntu":        "kxsession",
+		"GNOME":          "gnome",
+		"Ubuntu (GNOME)": "ubuntu:GNOME",
+		"Pop!_OS":        "pop:GNOME",
 	}
 	t.Setenv("XDG_CURRENT_DESKTOP", "")
 	t.Setenv("DESKTOP_SESSION", "")
