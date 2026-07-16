@@ -91,18 +91,18 @@ ______________________________________________________________________
 
 **Compatibility**
 
-- Go 1.26 (`go.mod`; devbox 툴체인 1.26과 동일 — 패밀리 내 유일하게 정렬 완료)
+- Go 1.26 (`go.mod`; devbox 툴체인 1.26과 동일 — gitforge와 함께 정렬 완료)
 
 **Safety**
 
 - 현재 전 명령이 **읽기 전용**이다. Phase 6(Backup/Sync)에서 쓰기를 도입할 때
   백업·`--dry-run`을 함께 제공하지 않으면 머지할 수 없다
 
-**Baseline (진행 중)**
+**Baseline**
 
-- `LICENSE`·CI 워크플로우 미보유 (GUIDELINES §4 격차) — 다음 작업 시 보완
-- devbox `go.work` use 목록에 미등록 — 독립 빌드(`GOWORK=off`). Phase 완료 후
-  gzh-cli wrapper 통합 시점에 등록한다
+- GUIDELINES §3 베이스라인 충족 — `Makefile`·`.golangci.yml`(v2)·CI·`LICENSE`(MIT)·
+  문서·본 PRODUCT.md 보유
+- devbox `go.work` use 목록에 등록됨
 
 ______________________________________________________________________
 
