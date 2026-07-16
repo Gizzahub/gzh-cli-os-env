@@ -38,12 +38,12 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 | Feature | KDE Plasma | GNOME | macOS | Windows |
 |---------|------------|-------|-------|---------|
 | Detection | ✅ | ✅ | ✅ | ✅ |
-| Power | planned | planned | ✅ | planned |
+| Power | ✅ (sysfs/upower) | ✅ (sysfs/upower) | ✅ | planned |
 | System (hosts) | ✅ | ✅ | ✅ | planned |
-| System (locale/timezone) | planned | planned | ✅ | planned |
-| Display | planned | planned | ✅ | planned |
-| Shortcuts | planned | planned | ✅ | planned |
-| Input (keyboard) | planned | planned | ✅ | planned |
+| System (locale/timezone) | ✅ | ✅ | ✅ | planned |
+| Display | ✅ (xrandr/wlr) | ✅ (xrandr/wlr) | ✅ | planned |
+| Shortcuts | ✅ (kglobalaccel) | ✅ (gsettings) | ✅ | planned |
+| Input (keyboard) | ✅ (setxkbmap) | ✅ (gsettings) | ✅ | planned |
 
 ## Module
 
@@ -53,5 +53,5 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 
 **Rebuild in progress.** macOS read paths are complete: detection, battery,
 system hosts/locale/timezone, display list, shortcuts, input keyboard.
-Remaining — Backup/Sync, non-macOS backends. See `tasks/plan/GZH_CLI_OS_ENV.md`
+Phase 4 Linux backends landed (power/system/display/shortcuts/input). Remaining — Phase 5 Windows, Phase 6 Backup/Sync. See `tasks/plan/GZH_CLI_OS_ENV.md`
 and `tasks/doing/P2-os-env-rebuild-continue.md` in gzh-cli-devbox.

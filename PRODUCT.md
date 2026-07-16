@@ -50,8 +50,8 @@ G2. **Domain coverage** (설계문서 6개 영역)
 G3. **Platform backends**
 
 - Target: 각 도메인의 macOS·Linux(KDE/GNOME)·Windows 백엔드 완비
-- 현재 **macOS 우선 구현**. Power·Display·locale/timezone·Shortcuts·Input은
-  macOS만 동작하고 그 외는 `ErrUnsupported`; Linux는 Phase 4, Windows는 Phase 5
+- 현재 **macOS + Linux(Phase 4)**. Power·Display·locale/timezone·Shortcuts·Input
+  Linux 백엔드 추가; Windows는 Phase 5, Backup/Sync는 Phase 6
 
 G4. **Pure-function separation**
 

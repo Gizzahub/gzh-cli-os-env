@@ -1,8 +1,9 @@
 // Copyright (c) 2026 Gizzahub
 // SPDX-License-Identifier: MIT
 
-// Package shortcuts reports keyboard shortcuts. Phase 3 covers macOS via
-// com.apple.symbolichotkeys; other platforms return ErrUnsupported.
+// Package shortcuts reports keyboard shortcuts. macOS uses
+// com.apple.symbolichotkeys; Linux covers GNOME (gsettings) and KDE
+// (kglobalshortcutsrc). Other platforms return ErrUnsupported.
 package shortcuts
 
 import (
@@ -22,10 +23,10 @@ var ErrUnsupported = errors.New("shortcuts: query unsupported on this platform")
 
 // Shortcut describes one system keyboard shortcut.
 type Shortcut struct {
-	ID      int    // Apple symbolic hotkey ID
+	ID      int    // Apple symbolic hotkey ID; 0 on Linux (Name/Binding identify the action)
 	Name    string // human-readable name; empty when the ID is not in knownHotkeys
 	Enabled bool
-	Binding string // e.g. "Cmd+Space"; empty when the shortcut uses its built-in default
+	Binding string // e.g. "Cmd+Space" or "<Alt>Tab"; empty when unbound / system default
 }
 
 // Named reports whether this shortcut's ID maps to a known name. Callers must
@@ -173,6 +174,8 @@ func List(ctx context.Context) ([]Shortcut, error) {
 	switch runtime.GOOS {
 	case "darwin":
 		return listMacOS(ctx)
+	case "linux":
+		return listLinux(ctx)
 	default:
 		return nil, ErrUnsupported
 	}

@@ -1,8 +1,9 @@
 // Copyright (c) 2026 Gizzahub
 // SPDX-License-Identifier: MIT
 
-// Package input reports input device configuration. Phase 3 covers macOS
-// keyboards via defaults; other platforms return ErrUnsupported.
+// Package input reports input device configuration. macOS uses defaults;
+// Linux covers GNOME (gsettings) and partial KDE (setxkbmap). Other
+// platforms return ErrUnsupported.
 package input
 
 import (
@@ -115,6 +116,8 @@ func GetKeyboard(ctx context.Context) (*Keyboard, error) {
 	switch runtime.GOOS {
 	case "darwin":
 		return keyboardMacOS(ctx)
+	case "linux":
+		return keyboardLinux(ctx)
 	default:
 		return nil, ErrUnsupported
 	}
