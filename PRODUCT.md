@@ -2,8 +2,8 @@
 
 **Project**: gzh-cli-os-env (library — `NewRootCmd()`, 바이너리 없음)
 **Doc Type**: Goals + Constraints + Quality Gates
-**Status**: Active — **Rebuild in progress (Phase 3/6)**
-**Last Updated**: 2026-07-16
+**Status**: Active — **Rebuild complete (Phase 6/6)**
+**Last Updated**: 2026-07-17
 
 ______________________________________________________________________
 
@@ -51,7 +51,7 @@ G3. **Platform backends**
 
 - Target: 각 도메인의 macOS·Linux(KDE/GNOME)·Windows 백엔드 완비
 - 현재 **macOS + Linux(Phase 4) + Windows(Phase 5)**. Power·Display·locale/timezone·
-  Shortcuts·Input 3-OS 읽기 경로; Backup/Sync는 Phase 6
+  Shortcuts·Input 3-OS 읽기 경로; Backup snapshot create/restore/diff 완료
 
 G4. **Pure-function separation**
 

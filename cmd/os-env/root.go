@@ -35,6 +35,7 @@ Examples:
 	cmd.AddCommand(newDisplayCmd())
 	cmd.AddCommand(newShortcutsCmd())
 	cmd.AddCommand(newInputCmd())
+	cmd.AddCommand(newBackupCmd())
 
 	return cmd
 }

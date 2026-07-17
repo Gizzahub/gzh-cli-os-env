@@ -15,14 +15,15 @@ make check     # fmt + lint + test
 ```
 gzh-cli-os-env/
 ├── cmd/os-env/          # CLI entry point (NewRootCmd)
-│                        # detect/power/system/display/shortcuts/input
+│                        # detect/power/system/display/shortcuts/input/backup
 └── pkg/
     ├── detector/        # OS / desktop environment detection
-    ├── power/           # Battery status (pure parser + macOS dispatch)
+    ├── power/           # Battery status (pure parser + platform dispatch)
     ├── system/          # hosts / locale / timezone
-    ├── display/         # Display list (pure parser + macOS dispatch)
-    ├── shortcuts/       # Symbolic hotkeys (pure parser + macOS dispatch)
-    └── input/           # Keyboard repeat / input sources (pure parser + dispatch)
+    ├── display/         # Display list (pure parser + platform dispatch)
+    ├── shortcuts/       # Symbolic hotkeys (pure parser + platform dispatch)
+    ├── input/           # Keyboard repeat / input sources (pure parser + dispatch)
+    └── backup/          # Config snapshot create/restore/diff (tar.gz)
 ```
 
 ## Key API
@@ -53,5 +54,5 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 
 **Rebuild in progress.** macOS read paths are complete: detection, battery,
 system hosts/locale/timezone, display list, shortcuts, input keyboard.
-Phase 4 Linux + Phase 5 Windows backends landed. Remaining — Phase 6 Backup/Sync. See `tasks/plan/GZH_CLI_OS_ENV.md`
+Phases 1–6 complete: macOS/Linux/Windows read paths + backup create/restore/diff. Apply-restore and remote git sync are follow-ups. See `tasks/plan/GZH_CLI_OS_ENV.md`
 and `tasks/doing/P2-os-env-rebuild-continue.md` in gzh-cli-devbox.
