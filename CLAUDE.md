@@ -45,6 +45,7 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 | Display | ✅ (xrandr/wlr) | ✅ (xrandr/wlr) | ✅ | ✅ (wmic) |
 | Shortcuts | ✅ (kglobalaccel) | ✅ (gsettings) | ✅ | ✅ (accessibility) |
 | Input (keyboard) | ✅ (setxkbmap) | ✅ (gsettings) | ✅ | ✅ (WinUserLanguageList) |
+| Backup (snapshot) | ✅ | ✅ | ✅ | ✅ |
 
 ## Module
 
@@ -52,7 +53,7 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 
 ## Status
 
-**Rebuild in progress.** macOS read paths are complete: detection, battery,
-system hosts/locale/timezone, display list, shortcuts, input keyboard.
-Phases 1–6 complete: macOS/Linux/Windows read paths + backup create/restore/diff. Apply-restore and remote git sync are follow-ups. See `tasks/plan/GZH_CLI_OS_ENV.md`
-and `tasks/doing/P2-os-env-rebuild-continue.md` in gzh-cli-devbox.
+**Rebuild complete (Phases 1–6).** macOS/Linux/Windows read paths + backup
+create/restore/diff. Apply-restore and remote git sync are follow-ups.
+See `tasks/plan/GZH_CLI_OS_ENV.md` and
+`tasks/done/P2-os-env-rebuild-continue.md` in gzh-cli-devbox.
