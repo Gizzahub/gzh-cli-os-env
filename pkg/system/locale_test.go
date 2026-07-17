@@ -5,6 +5,26 @@ package system
 
 import "testing"
 
+func TestParsePowerShellCulture(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{name: "simple", in: "ko-KR\n", want: "ko-KR"},
+		{name: "padded", in: "\n  en-US  \n", want: "en-US"},
+		{name: "blank", in: "\n\n", want: ""},
+		{name: "empty", in: "", want: ""},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := ParsePowerShellCulture(tc.in); got != tc.want {
+				t.Errorf("ParsePowerShellCulture() = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestParseLocalectlStatus(t *testing.T) {
 	cases := []struct {
 		name string

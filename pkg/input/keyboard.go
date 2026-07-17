@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 // Package input reports input device configuration. macOS uses defaults;
-// Linux covers GNOME (gsettings) and partial KDE (setxkbmap). Other
-// platforms return ErrUnsupported.
+// Linux covers GNOME (gsettings) and partial KDE (setxkbmap); Windows uses
+// Get-WinUserLanguageList and optional KeyboardDelay from the registry.
+// Other platforms return ErrUnsupported.
 package input
 
 import (
@@ -118,6 +119,8 @@ func GetKeyboard(ctx context.Context) (*Keyboard, error) {
 		return keyboardMacOS(ctx)
 	case "linux":
 		return keyboardLinux(ctx)
+	case "windows":
+		return keyboardWindows(ctx)
 	default:
 		return nil, ErrUnsupported
 	}

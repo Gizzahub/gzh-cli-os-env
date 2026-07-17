@@ -18,6 +18,7 @@ var ErrLocaleUnsupported = errors.New("system: locale query unsupported on this 
 // GetLocale returns the user's locale identifier. On macOS it reads
 // `defaults read .GlobalPreferences AppleLocale` (e.g. "ko_KR").
 // On Linux it prefers $LANG, then falls back to `localectl status`.
+// On Windows it runs `(Get-Culture).Name` via PowerShell (e.g. "ko-KR").
 // Canceling ctx aborts the underlying platform query.
 func GetLocale(ctx context.Context) (string, error) {
 	switch runtime.GOOS {
@@ -25,6 +26,8 @@ func GetLocale(ctx context.Context) (string, error) {
 		return getLocaleMacOS(ctx)
 	case "linux":
 		return getLocaleLinux(ctx)
+	case "windows":
+		return getLocaleWindows(ctx)
 	default:
 		return "", ErrLocaleUnsupported
 	}
@@ -78,4 +81,31 @@ func ParseLocalectlStatus(output string) string {
 		}
 	}
 	return ""
+}
+
+// ParsePowerShellCulture returns the first non-empty trimmed line from
+// PowerShell culture output (e.g. "ko-KR" from `(Get-Culture).Name`).
+// Pure function for offline unit tests.
+func ParsePowerShellCulture(output string) string {
+	for _, line := range strings.Split(output, "\n") {
+		line = strings.TrimSpace(line)
+		if line != "" {
+			return line
+		}
+	}
+	return ""
+}
+
+func getLocaleWindows(ctx context.Context) (string, error) {
+	// #nosec G204 -- fixed PowerShell command, no user input
+	out, err := exec.CommandContext(ctx, "powershell", "-NoProfile", "-Command",
+		"(Get-Culture).Name").Output()
+	if err != nil {
+		return "", err
+	}
+	loc := ParsePowerShellCulture(string(out))
+	if loc == "" {
+		return "", errors.New("system: could not parse PowerShell culture")
+	}
+	return loc, nil
 }

@@ -5,7 +5,9 @@ package system
 
 import (
 	"context"
+	"errors"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -47,10 +49,14 @@ func ParseTimedatectlShow(output string) string {
 	return ""
 }
 
-// GetTimezone resolves the current timezone via /etc/localtime, with a
-// timedatectl fallback on Linux when the symlink is unavailable.
+// GetTimezone resolves the current timezone.
+// Unix: /etc/localtime symlink, then timedatectl on Linux.
+// Windows: tzutil /g.
 // Canceling ctx aborts the underlying platform query.
 func GetTimezone(ctx context.Context) (string, error) {
+	if runtime.GOOS == "windows" {
+		return getTimezoneWindows(ctx)
+	}
 	out, err := exec.CommandContext(ctx, "readlink", "/etc/localtime").Output()
 	if err == nil {
 		return ParseTimezoneLink(string(out)), nil
@@ -64,4 +70,22 @@ func GetTimezone(ctx context.Context) (string, error) {
 		return tz, nil
 	}
 	return "", err
+}
+
+// ParseTzutilOutput trims `tzutil /g` output (Windows time zone ID).
+func ParseTzutilOutput(output string) string {
+	return strings.TrimSpace(output)
+}
+
+func getTimezoneWindows(ctx context.Context) (string, error) {
+	// #nosec G204 -- fixed tzutil args, no user input
+	out, err := exec.CommandContext(ctx, "tzutil", "/g").Output()
+	if err != nil {
+		return "", err
+	}
+	tz := ParseTzutilOutput(string(out))
+	if tz == "" {
+		return "", errors.New("system: empty tzutil output")
+	}
+	return tz, nil
 }

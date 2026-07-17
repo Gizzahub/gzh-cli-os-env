@@ -3,7 +3,9 @@
 
 // Package shortcuts reports keyboard shortcuts. macOS uses
 // com.apple.symbolichotkeys; Linux covers GNOME (gsettings) and KDE
-// (kglobalshortcutsrc). Other platforms return ErrUnsupported.
+// (kglobalshortcutsrc); Windows probes Accessibility registry state via
+// PowerShell (empty list means supported, none discovered). Other
+// platforms return ErrUnsupported.
 package shortcuts
 
 import (
@@ -176,6 +178,8 @@ func List(ctx context.Context) ([]Shortcut, error) {
 		return listMacOS(ctx)
 	case "linux":
 		return listLinux(ctx)
+	case "windows":
+		return listWindows(ctx)
 	default:
 		return nil, ErrUnsupported
 	}

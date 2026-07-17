@@ -34,6 +34,26 @@ func TestParseTimezoneLink_Plain(t *testing.T) {
 	}
 }
 
+func TestParseTzutilOutput(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{name: "korea", in: "Korea Standard Time\n", want: "Korea Standard Time"},
+		{name: "padded", in: "  Pacific Standard Time  \r\n", want: "Pacific Standard Time"},
+		{name: "empty", in: "\n", want: ""},
+		{name: "blank", in: "", want: ""},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := ParseTzutilOutput(tc.in); got != tc.want {
+				t.Errorf("ParseTzutilOutput() = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestParseTimedatectlShow(t *testing.T) {
 	cases := []struct {
 		name string

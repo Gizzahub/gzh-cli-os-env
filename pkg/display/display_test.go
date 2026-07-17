@@ -133,3 +133,96 @@ func TestParseWlrRandr_Empty(t *testing.T) {
 		t.Fatalf("got=%+v", got)
 	}
 }
+
+func TestParseWmicDesktopMonitor_VideoController(t *testing.T) {
+	sample := `
+Name=Intel(R) UHD Graphics
+CurrentHorizontalResolution=1920
+CurrentVerticalResolution=1080
+
+Name=NVIDIA GeForce RTX 3060
+CurrentHorizontalResolution=2560
+CurrentVerticalResolution=1440
+`
+	got := ParseWmicDesktopMonitor(sample)
+	if len(got) != 2 {
+		t.Fatalf("len=%d got=%+v", len(got), got)
+	}
+	if got[0].Name != "Intel(R) UHD Graphics" || !got[0].Main {
+		t.Errorf("first=%+v", got[0])
+	}
+	if got[0].Resolution != "1920 x 1080" {
+		t.Errorf("first res=%q", got[0].Resolution)
+	}
+	if got[1].Name != "NVIDIA GeForce RTX 3060" || got[1].Main {
+		t.Errorf("second=%+v", got[1])
+	}
+	if got[1].Resolution != "2560 x 1440" {
+		t.Errorf("second res=%q", got[1].Resolution)
+	}
+}
+
+func TestParseWmicDesktopMonitor_DesktopMonitor(t *testing.T) {
+	sample := `
+Name=Generic PnP Monitor
+ScreenHeight=1080
+ScreenWidth=1920
+`
+	got := ParseWmicDesktopMonitor(sample)
+	if len(got) != 1 {
+		t.Fatalf("len=%d got=%+v", len(got), got)
+	}
+	if got[0].Name != "Generic PnP Monitor" || !got[0].Main {
+		t.Errorf("got=%+v", got[0])
+	}
+	if got[0].Resolution != "1920 x 1080" {
+		t.Errorf("res=%q", got[0].Resolution)
+	}
+}
+
+func TestParseWmicDesktopMonitor_SkipZeroResolution(t *testing.T) {
+	sample := `
+Name=Microsoft Basic Display Adapter
+CurrentHorizontalResolution=0
+CurrentVerticalResolution=0
+
+Name=AMD Radeon
+CurrentHorizontalResolution=3840
+CurrentVerticalResolution=2160
+`
+	got := ParseWmicDesktopMonitor(sample)
+	if len(got) != 1 {
+		t.Fatalf("len=%d got=%+v", len(got), got)
+	}
+	if got[0].Name != "AMD Radeon" || got[0].Resolution != "3840 x 2160" || !got[0].Main {
+		t.Errorf("got=%+v", got[0])
+	}
+}
+
+func TestParseWmicDesktopMonitor_Empty(t *testing.T) {
+	if got := ParseWmicDesktopMonitor(""); len(got) != 0 {
+		t.Fatalf("got=%+v", got)
+	}
+}
+
+func TestParseWmicDesktopMonitor(t *testing.T) {
+	in := `
+Name=Intel UHD Graphics
+CurrentHorizontalResolution=1920
+CurrentVerticalResolution=1080
+
+Name=NVIDIA GeForce
+CurrentHorizontalResolution=2560
+CurrentVerticalResolution=1440
+`
+	got := ParseWmicDesktopMonitor(in)
+	if len(got) != 2 {
+		t.Fatalf("len=%d %+v", len(got), got)
+	}
+	if got[0].Name != "Intel UHD Graphics" || got[0].Resolution != "1920 x 1080" || !got[0].Main {
+		t.Errorf("first=%+v", got[0])
+	}
+	if got[1].Resolution != "2560 x 1440" || got[1].Main {
+		t.Errorf("second=%+v", got[1])
+	}
+}

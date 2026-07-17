@@ -3,7 +3,8 @@
 
 // Package display reports connected displays. Phase 3 covers macOS via
 // system_profiler SPDisplaysDataType; Phase 4 adds Linux via xrandr
-// (with optional wlr-randr fallback). Other platforms return ErrUnsupported.
+// (with optional wlr-randr fallback); Phase 5 adds Windows via WMIC
+// Win32_VideoController. Other platforms return ErrUnsupported.
 package display
 
 import (
@@ -12,6 +13,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -174,6 +176,87 @@ func ParseWlrRandr(output string) []Info {
 	return displays
 }
 
+// ParseWmicDesktopMonitor parses WMIC /format:list output for display
+// adapters or monitors. Accepts either DesktopMonitor fields:
+//
+//	Name=Generic PnP Monitor
+//	ScreenHeight=1080
+//	ScreenWidth=1920
+//
+// or VideoController fields:
+//
+//	Name=Intel(R) UHD Graphics
+//	CurrentHorizontalResolution=1920
+//	CurrentVerticalResolution=1080
+//
+// Multiple blank-line-separated records become multiple Info entries.
+// The first entry with a resolution is marked Main. Pure function for tests.
+//
+//nolint:gocognit,gocyclo // WMIC list-format state machine is linear but branch-heavy
+func ParseWmicDesktopMonitor(output string) []Info {
+	var displays []Info
+	var name, w, h string
+	flush := func() {
+		if name == "" && w == "" && h == "" {
+			return
+		}
+		info := Info{Name: name}
+		if w != "" && h != "" {
+			info.Resolution = w + " x " + h
+		}
+		if info.Name != "" || info.Resolution != "" {
+			displays = append(displays, info)
+		}
+		name, w, h = "", "", ""
+	}
+	for _, line := range strings.Split(output, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			flush()
+			continue
+		}
+		eq := strings.Index(line, "=")
+		if eq <= 0 {
+			continue
+		}
+		key := strings.ToLower(strings.TrimSpace(line[:eq]))
+		val := strings.TrimSpace(line[eq+1:])
+		switch key {
+		case "name":
+			// New Name within a record without blank separator: flush previous.
+			if name != "" || w != "" || h != "" {
+				flush()
+			}
+			name = val
+		case "screenwidth", "currenthorizontalresolution":
+			if n, err := strconv.Atoi(val); err == nil && n > 0 {
+				w = strconv.Itoa(n)
+			}
+		case "screenheight", "currentverticalresolution":
+			if n, err := strconv.Atoi(val); err == nil && n > 0 {
+				h = strconv.Itoa(n)
+			}
+		}
+	}
+	flush()
+	// Drop entries with neither name nor resolution; prefer those with resolution.
+	out := make([]Info, 0, len(displays))
+	for _, d := range displays {
+		if d.Resolution == "" && d.Name == "" {
+			continue
+		}
+		// Skip zero-resolution adapters (inactive heads often report 0).
+		if d.Resolution == "" {
+			continue
+		}
+		out = append(out, d)
+	}
+	if len(out) > 0 {
+		out[0].Main = true
+	}
+	return out
+}
+
 // List returns connected displays for the current platform.
 // Canceling ctx aborts the underlying platform query.
 func List(ctx context.Context) ([]Info, error) {
@@ -182,6 +265,8 @@ func List(ctx context.Context) ([]Info, error) {
 		return listMacOS(ctx)
 	case "linux":
 		return listLinux(ctx)
+	case "windows":
+		return listWindows(ctx)
 	default:
 		return nil, ErrUnsupported
 	}
@@ -208,4 +293,19 @@ func listLinux(ctx context.Context) ([]Info, error) {
 		}
 	}
 	return nil, ErrUnsupported
+}
+
+func listWindows(ctx context.Context) ([]Info, error) {
+	// #nosec G204 -- fixed wmic path/args, no user input
+	out, err := exec.CommandContext(ctx, "wmic", "path", "Win32_VideoController",
+		"get", "Name,CurrentHorizontalResolution,CurrentVerticalResolution",
+		"/format:list").Output()
+	if err != nil {
+		return nil, err
+	}
+	displays := ParseWmicDesktopMonitor(string(out))
+	if len(displays) == 0 {
+		return nil, ErrUnsupported
+	}
+	return displays, nil
 }

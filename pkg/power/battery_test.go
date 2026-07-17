@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 )
 
@@ -216,5 +217,105 @@ func TestReadSysfsBattery_NoBattery(t *testing.T) {
 
 	if _, err := readSysfsBattery(); !errors.Is(err, ErrNoBattery) {
 		t.Fatalf("got err=%v, want ErrNoBattery", err)
+	}
+}
+
+func TestParseWmicBatteryList_AC(t *testing.T) {
+	in := "EstimatedChargeRemaining=85\nBatteryStatus=2\n"
+	s, err := ParseWmicBatteryList(in)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if s.Percent != 85 || s.Source != "AC" || s.Charging {
+		t.Errorf("got %+v", s)
+	}
+}
+
+func TestParseWmicBatteryList_Discharging(t *testing.T) {
+	in := `
+EstimatedChargeRemaining=45
+BatteryStatus=1
+`
+	s, err := ParseWmicBatteryList(in)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if s.Percent != 45 || s.Source != "Battery" || s.Charging {
+		t.Errorf("got %+v", s)
+	}
+}
+
+func TestParseWmicBatteryList_Charging(t *testing.T) {
+	for _, code := range []int{6, 7, 8, 9} {
+		in := "EstimatedChargeRemaining=60\nBatteryStatus=" + strconv.Itoa(code) + "\n"
+		s, err := ParseWmicBatteryList(in)
+		if err != nil {
+			t.Fatalf("code %d: unexpected error: %v", code, err)
+		}
+		if s.Percent != 60 || s.Source != "AC" || !s.Charging {
+			t.Errorf("code %d: got %+v", code, s)
+		}
+	}
+}
+
+func TestParseWmicBatteryList_Invalid(t *testing.T) {
+	if _, err := ParseWmicBatteryList("no battery fields"); err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if _, err := ParseWmicBatteryList("EstimatedChargeRemaining=abc\nBatteryStatus=2\n"); err == nil {
+		t.Fatal("expected error for invalid percent")
+	}
+}
+
+func TestParsePowerShellBattery(t *testing.T) {
+	in := `
+EstimatedChargeRemaining : 85
+BatteryStatus            : 2
+`
+	s, err := ParsePowerShellBattery(in)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if s.Percent != 85 || s.Source != "AC" || s.Charging {
+		t.Errorf("got %+v", s)
+	}
+}
+
+func TestParsePowerShellBattery_Charging(t *testing.T) {
+	in := "EstimatedChargeRemaining : 42\nBatteryStatus            : 6\n"
+	s, err := ParsePowerShellBattery(in)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if s.Percent != 42 || s.Source != "AC" || !s.Charging {
+		t.Errorf("got %+v", s)
+	}
+}
+
+func TestParsePowerShellBattery_Discharging(t *testing.T) {
+	in := "EstimatedChargeRemaining : 30\nBatteryStatus            : 1\n"
+	s, err := ParsePowerShellBattery(in)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if s.Percent != 30 || s.Source != "Battery" || s.Charging {
+		t.Errorf("got %+v", s)
+	}
+}
+
+func TestParsePowerShellBattery_Invalid(t *testing.T) {
+	if _, err := ParsePowerShellBattery(""); err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}
+
+func TestParseWmicBatteryList(t *testing.T) {
+	in := "\nEstimatedChargeRemaining=85\nBatteryStatus=6\n\n"
+	s, err := ParseWmicBatteryList(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.Percent != 85 || s.Source != "AC" || !s.Charging {
+		t.Fatalf("%+v", s)
 	}
 }

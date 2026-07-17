@@ -9,7 +9,7 @@
 
 이 프로젝트는 GitHub 저장소가 비어있는 상태(Code Lost)에서 2026-07-03부터
 재구현 중이다. 설계문서(`tasks/plan/GZH_CLI_OS_ENV.md`, gzh-cli-devbox) 기준
-6개 영역 중 아래 기능만 구현되어 있으며 macOS + Linux(KDE/GNOME) 읽기 경로가 있다. Windows
+6개 영역 중 아래 기능만 구현되어 있으며 macOS + Linux(KDE/GNOME) + Windows 읽기 경로가 있다. Backup/Sync
 백엔드, 단축키(Shortcuts), 입력장치(Input), 설정 백업/동기화(Backup/Sync)는
 아직 없다. 진행 상황은 `tasks/doing/P2-os-env-rebuild-continue.md` 참고.
 
@@ -62,12 +62,12 @@ pkg/display/         디스플레이 목록 (순수 파싱 함수 + macOS dispat
 | Feature                  | KDE Plasma | GNOME   | macOS | Windows |
 |---------------------------|------------|---------|-------|---------|
 | Detection                 | ✅         | ✅      | ✅    | ✅      |
-| Power                      | ✅ (sysfs)  | ✅ (sysfs) | ✅    | planned |
+| Power                      | ✅ (sysfs)  | ✅ (sysfs) | ✅    | ✅      |
 | System (hosts)             | ✅         | ✅      | ✅    | planned |
-| System (locale/timezone)   | ✅         | ✅      | ✅    | planned |
-| Display                    | ✅ (xrandr) | ✅ (xrandr) | ✅    | planned |
-| Shortcuts                  | ✅         | ✅      | ✅    | planned |
-| Input                      | ✅         | ✅      | ✅    | planned |
+| System (locale/timezone)   | ✅         | ✅      | ✅    | ✅      |
+| Display                    | ✅ (xrandr) | ✅ (xrandr) | ✅    | ✅      |
+| Shortcuts                  | ✅         | ✅      | ✅    | ✅      |
+| Input                      | ✅         | ✅      | ✅    | ✅      |
 
 ## 개발
 
