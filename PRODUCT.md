@@ -96,8 +96,11 @@ ______________________________________________________________________
 
 **Safety**
 
-- 현재 전 명령이 **읽기 전용**이다. Phase 6(Backup/Sync)에서 쓰기를 도입할 때
-  백업·`--dry-run`을 함께 제공하지 않으면 머지할 수 없다
+- 읽기 전용 명령이 기본이다. 쓰기 경로(`backup restore --apply`)는
+  `--dry-run` 계획 확인을 지원하며, 미지원 도메인은 skip+reason으로 보고한다.
+  locale/timezone set는 macOS·Linux만; Windows set는 unsupported 에러.
+  권한 상승(sudo)은 호출하지 않는다 — 플랫폼 도구가 권한을 요구하면 실패를
+  표면화한다.
 
 **Baseline**
 

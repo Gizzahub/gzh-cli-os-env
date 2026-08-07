@@ -7,6 +7,9 @@
 // manifest.json with collected settings (locale, timezone, keyboard,
 // displays, shortcuts). Collectors run best-effort: missing platform
 // support yields empty fields, not a hard failure.
+//
+// Apply writes supported domains (locale, timezone) via DomainWriter;
+// unsupported domains are skipped with an explicit reason (never silent).
 package backup
 
 import (

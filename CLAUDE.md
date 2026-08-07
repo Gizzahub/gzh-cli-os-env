@@ -46,6 +46,7 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 | Shortcuts | ✅ (kglobalaccel) | ✅ (gsettings) | ✅ | ✅ (accessibility) |
 | Input (keyboard) | ✅ (setxkbmap) | ✅ (gsettings) | ✅ | ✅ (WinUserLanguageList) |
 | Backup (snapshot) | ✅ | ✅ | ✅ | ✅ |
+| Backup apply (locale/tz) | ✅ | ✅ | ✅ | set unsupported |
 
 ## Module
 
@@ -53,7 +54,8 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 
 ## Status
 
-**Rebuild complete (Phases 1–6).** macOS/Linux/Windows read paths + backup
-create/restore/diff. Apply-restore and remote git sync are follow-ups.
-See `tasks/plan/GZH_CLI_OS_ENV.md` and
+**Rebuild complete (Phases 1–6) + restore apply.** macOS/Linux/Windows read
+paths + backup create/restore/diff; `backup restore --apply` writes
+locale/timezone on macOS/Linux (injectable DomainWriter). Remote git sync is a
+follow-up. See `tasks/plan/GZH_CLI_OS_ENV.md` and
 `tasks/done/P2-os-env-rebuild-continue.md` in gzh-cli-devbox.

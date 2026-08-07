@@ -3,7 +3,9 @@
 
 package system
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestParseTimezoneLink_Zoneinfo(t *testing.T) {
 	cases := map[string]string{
@@ -94,5 +96,11 @@ RTCTimeUSec=Fri 2026-07-17 03:00:00 UTC
 				t.Errorf("ParseTimedatectlShow() = %q, want %q", got, tc.want)
 			}
 		})
+	}
+}
+
+func TestSetTimezone_Empty(t *testing.T) {
+	if err := SetTimezone(t.Context(), " \t "); err == nil {
+		t.Fatal("expected error for empty timezone")
 	}
 }

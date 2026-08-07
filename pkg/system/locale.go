@@ -6,6 +6,7 @@ package system
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -15,6 +16,9 @@ import (
 // ErrLocaleUnsupported is returned on platforms without a locale backend.
 var ErrLocaleUnsupported = errors.New("system: locale query unsupported on this platform")
 
+// ErrLocaleSetUnsupported is returned when setting locale is not supported.
+var ErrLocaleSetUnsupported = errors.New("system: locale set unsupported on this platform")
+
 // GetLocale returns the user's locale identifier. On macOS it reads
 // `defaults read .GlobalPreferences AppleLocale` (e.g. "ko_KR").
 // On Linux it prefers $LANG, then falls back to `localectl status`.
@@ -22,15 +26,71 @@ var ErrLocaleUnsupported = errors.New("system: locale query unsupported on this 
 // Canceling ctx aborts the underlying platform query.
 func GetLocale(ctx context.Context) (string, error) {
 	switch runtime.GOOS {
-	case "darwin":
+	case goosDarwin:
 		return getLocaleMacOS(ctx)
-	case "linux":
+	case goosLinux:
 		return getLocaleLinux(ctx)
-	case "windows":
+	case goosWindows:
 		return getLocaleWindows(ctx)
 	default:
 		return "", ErrLocaleUnsupported
 	}
+}
+
+// SetLocale writes the user locale identifier.
+// macOS: `defaults write -g AppleLocale -string <locale>`.
+// Linux: `localectl set-locale LANG=<locale>` (may require elevated privileges).
+// Windows and other platforms return ErrLocaleSetUnsupported.
+// Empty locale returns an error. Canceling ctx aborts the command.
+func SetLocale(ctx context.Context, locale string) error {
+	locale = strings.TrimSpace(locale)
+	if locale == "" {
+		return errors.New("system: empty locale")
+	}
+	switch runtime.GOOS {
+	case goosDarwin:
+		return setLocaleMacOS(ctx, locale)
+	case goosLinux:
+		return setLocaleLinux(ctx, locale)
+	case goosWindows:
+		return ErrLocaleSetUnsupported
+	default:
+		return ErrLocaleSetUnsupported
+	}
+}
+
+func setLocaleMacOS(ctx context.Context, locale string) error {
+	// Match GetLocale which reads .GlobalPreferences / NSGlobalDomain AppleLocale.
+	// #nosec G204 -- locale is validated non-empty; argv is fixed command + flag form
+	cmd := exec.CommandContext(ctx, "defaults", "write", "-g", "AppleLocale", "-string", locale)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		msg := strings.TrimSpace(string(out))
+		if msg != "" {
+			return fmt.Errorf("system: set locale: %w: %s", err, msg)
+		}
+		return fmt.Errorf("system: set locale: %w", err)
+	}
+	return nil
+}
+
+func setLocaleLinux(ctx context.Context, locale string) error {
+	// localectl expects LANG=... form; accept bare "ko_KR.UTF-8" too.
+	value := locale
+	if !strings.Contains(value, "=") {
+		value = "LANG=" + locale
+	}
+	// #nosec G204 -- fixed binary; value is a single argv element
+	cmd := exec.CommandContext(ctx, "localectl", "set-locale", value)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		msg := strings.TrimSpace(string(out))
+		if msg != "" {
+			return fmt.Errorf("system: set locale: %w: %s", err, msg)
+		}
+		return fmt.Errorf("system: set locale: %w", err)
+	}
+	return nil
 }
 
 func getLocaleMacOS(ctx context.Context) (string, error) {

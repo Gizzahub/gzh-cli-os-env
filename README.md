@@ -8,8 +8,9 @@
 ## 상태
 
 재구현 Phases 1–6 완료(2026-07-17). macOS + Linux(KDE/GNOME) + Windows 읽기
-경로와 설정 스냅샷 백업(`backup create|restore|diff`)이 있다. 호스트 적용
-(apply-restore)과 git remote sync는 후속 작업.
+경로와 설정 스냅샷 백업(`backup create|restore|diff`)이 있다. restore
+`--apply`는 locale/timezone write(macOS·Linux)를 지원하고, 미지원 도메인은
+skip+reason으로 보고한다. git remote sync는 후속 작업.
 
 ## 주요 기능
 
@@ -34,6 +35,8 @@ os-env system timezone        # 현재 timezone (macOS)
 os-env display list           # 연결된 디스플레이 목록
 os-env backup create -o snap.tar.gz
 os-env backup restore -i snap.tar.gz
+os-env backup restore -i snap.tar.gz --apply --dry-run   # plan only
+os-env backup restore -i snap.tar.gz --apply             # locale/timezone write
 os-env backup diff --from snap.tar.gz
 ```
 
@@ -69,7 +72,8 @@ pkg/backup/          설정 스냅샷 create/restore/diff
 | Display                    | ✅ (xrandr) | ✅ (xrandr) | ✅    | ✅      |
 | Shortcuts                  | ✅         | ✅      | ✅    | ✅      |
 | Input                      | ✅         | ✅      | ✅    | ✅      |
-| Backup                     | ✅         | ✅      | ✅    | ✅      |
+| Backup (snapshot)          | ✅         | ✅      | ✅    | ✅      |
+| Backup apply (locale/tz)   | ✅         | ✅      | ✅    | unsupported set |
 
 ## 개발
 

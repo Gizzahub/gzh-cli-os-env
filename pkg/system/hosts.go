@@ -1,14 +1,21 @@
 // Copyright (c) 2026 Gizzahub
 // SPDX-License-Identifier: MIT
 
-// Package system reports and (in later phases) edits OS-level settings:
-// hosts file, locale, and timezone. Phase 3a covers read-only access on
-// macOS; writes and other platforms arrive later.
+// Package system reports and edits OS-level settings: hosts file, locale,
+// and timezone. Locale/timezone writes are supported on macOS and Linux;
+// Windows set paths return unsupported errors.
 package system
 
 import (
 	"os"
 	"strings"
+)
+
+// runtime.GOOS string constants (goconst across Get/Set dispatch).
+const (
+	goosDarwin  = "darwin"
+	goosLinux   = "linux"
+	goosWindows = "windows"
 )
 
 // HostsEntry is one parsed line of /etc/hosts: an IP and its hostnames.

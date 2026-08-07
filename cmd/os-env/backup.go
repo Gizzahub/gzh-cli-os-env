@@ -5,6 +5,7 @@ package osenv
 
 import (
 	"fmt"
+	"io"
 	"path/filepath"
 
 	"github.com/gizzahub/gzh-cli-os-env/pkg/backup"
@@ -14,7 +15,7 @@ import (
 func newBackupCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "backup",
-		Short: "Create and inspect OS config backups",
+		Short: "Create and restore OS config backups",
 	}
 	cmd.AddCommand(newBackupCreateCmd(), newBackupRestoreCmd(), newBackupDiffCmd())
 	return cmd
@@ -51,56 +52,119 @@ into a gzip tar archive (manifest.json inside).`,
 }
 
 func newBackupRestoreCmd() *cobra.Command {
-	var input string
+	var (
+		input  string
+		apply  bool
+		dryRun bool
+	)
 	cmd := &cobra.Command{
 		Use:   "restore",
-		Short: "Show settings from a backup archive (apply not yet implemented)",
-		Long: `Load a backup archive and print the stored snapshot.
+		Short: "Inspect or apply settings from a backup archive",
+		Long: `Load a backup archive and either print the stored snapshot (default)
+or apply supported domains back to the host.
 
-Phase 6 ships read/inspect restore. Applying settings back to the host
-(write paths) is deferred until cross-platform set APIs exist.`,
+Without --apply the command is inspect-only.
+
+With --apply, locale and timezone are written via platform set APIs
+(macOS/Linux). keyboard, displays, and shortcuts are skipped with an
+explicit reason until set APIs exist. Windows set paths return
+unsupported errors from pkg/system.
+
+Use --apply --dry-run to print the planned domains without writing.`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if input == "" {
 				return fmt.Errorf("--input is required")
+			}
+			if dryRun && !apply {
+				return fmt.Errorf("--dry-run requires --apply")
 			}
 			s, err := backup.Load(input)
 			if err != nil {
 				return err
 			}
 			w := cmd.OutOrStdout()
-			if _, err := fmt.Fprintf(w, "Version:  %d\n", s.Version); err != nil {
-				return err
+			if !apply {
+				return printSnapshotInspect(w, s)
 			}
-			if _, err := fmt.Fprintf(w, "Created:  %s\n", s.CreatedAt.Format("2006-01-02T15:04:05Z")); err != nil {
-				return err
-			}
-			if _, err := fmt.Fprintf(w, "Desktop:  %s\n", s.Desktop); err != nil {
-				return err
-			}
-			if _, err := fmt.Fprintf(w, "Locale:   %s\n", s.Locale); err != nil {
-				return err
-			}
-			if _, err := fmt.Fprintf(w, "Timezone: %s\n", s.Timezone); err != nil {
-				return err
-			}
-			if s.Keyboard != nil {
-				if _, err := fmt.Fprintf(w, "Keyboard sources: %d\n", len(s.Keyboard.Sources)); err != nil {
-					return err
+			result, err := backup.Apply(cmd.Context(), s, backup.ApplyOptions{DryRun: dryRun})
+			if result != nil {
+				if printErr := printApplyResult(w, result, dryRun); printErr != nil {
+					return printErr
 				}
 			}
-			if _, err := fmt.Fprintf(w, "Displays: %d\n", len(s.Displays)); err != nil {
-				return err
-			}
-			_, err = fmt.Fprintf(w, "Shortcuts: %d\n", len(s.Shortcuts))
 			return err
 		},
 	}
 	cmd.Flags().StringVarP(&input, "input", "i", "", "input archive path")
+	cmd.Flags().BoolVar(&apply, "apply", false, "apply supported domains to the host")
+	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "with --apply, plan domains without writing")
 	if err := cmd.MarkFlagRequired("input"); err != nil {
 		panic(err)
 	}
 	return cmd
+}
+
+func printSnapshotInspect(w io.Writer, s *backup.Snapshot) error {
+	if _, err := fmt.Fprintf(w, "Version:  %d\n", s.Version); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "Created:  %s\n", s.CreatedAt.Format("2006-01-02T15:04:05Z")); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "Desktop:  %s\n", s.Desktop); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "Locale:   %s\n", s.Locale); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "Timezone: %s\n", s.Timezone); err != nil {
+		return err
+	}
+	if s.Keyboard != nil {
+		if _, err := fmt.Fprintf(w, "Keyboard sources: %d\n", len(s.Keyboard.Sources)); err != nil {
+			return err
+		}
+	}
+	if _, err := fmt.Fprintf(w, "Displays: %d\n", len(s.Displays)); err != nil {
+		return err
+	}
+	_, err := fmt.Fprintf(w, "Shortcuts: %d\n", len(s.Shortcuts))
+	return err
+}
+
+func printApplyResult(w io.Writer, result *backup.ApplyResult, dryRun bool) error {
+	if dryRun {
+		if len(result.Planned) == 0 {
+			if _, err := fmt.Fprintln(w, "Planned: (none)"); err != nil {
+				return err
+			}
+		} else {
+			for _, d := range result.Planned {
+				if _, err := fmt.Fprintf(w, "Planned: %s\n", d); err != nil {
+					return err
+				}
+			}
+		}
+	} else {
+		if len(result.Applied) == 0 {
+			if _, err := fmt.Fprintln(w, "Applied: (none)"); err != nil {
+				return err
+			}
+		} else {
+			for _, d := range result.Applied {
+				if _, err := fmt.Fprintf(w, "Applied: %s\n", d); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	for _, sk := range result.Skipped {
+		if _, err := fmt.Fprintf(w, "Skipped: %s (%s)\n", sk.Domain, sk.Reason); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func newBackupDiffCmd() *cobra.Command {

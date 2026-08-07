@@ -6,6 +6,7 @@ package system
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -49,12 +50,15 @@ func ParseTimedatectlShow(output string) string {
 	return ""
 }
 
+// ErrTimezoneSetUnsupported is returned when setting timezone is not supported.
+var ErrTimezoneSetUnsupported = errors.New("system: timezone set unsupported on this platform")
+
 // GetTimezone resolves the current timezone.
 // Unix: /etc/localtime symlink, then timedatectl on Linux.
 // Windows: tzutil /g.
 // Canceling ctx aborts the underlying platform query.
 func GetTimezone(ctx context.Context) (string, error) {
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == goosWindows {
 		return getTimezoneWindows(ctx)
 	}
 	out, err := exec.CommandContext(ctx, "readlink", "/etc/localtime").Output()
@@ -70,6 +74,57 @@ func GetTimezone(ctx context.Context) (string, error) {
 		return tz, nil
 	}
 	return "", err
+}
+
+// SetTimezone writes the system timezone.
+// macOS: `systemsetup -settimezone <tz>` (typically requires admin privileges).
+// Linux: `timedatectl set-timezone <tz>` (may require elevated privileges).
+// Windows returns ErrTimezoneSetUnsupported.
+// Empty tz returns an error. Canceling ctx aborts the command.
+func SetTimezone(ctx context.Context, tz string) error {
+	tz = strings.TrimSpace(tz)
+	if tz == "" {
+		return errors.New("system: empty timezone")
+	}
+	switch runtime.GOOS {
+	case goosDarwin:
+		return setTimezoneMacOS(ctx, tz)
+	case goosLinux:
+		return setTimezoneLinux(ctx, tz)
+	case goosWindows:
+		return ErrTimezoneSetUnsupported
+	default:
+		return ErrTimezoneSetUnsupported
+	}
+}
+
+func setTimezoneMacOS(ctx context.Context, tz string) error {
+	// systemsetup usually needs root; surface command stderr on failure.
+	// #nosec G204 -- fixed binary; tz is a single argv element
+	cmd := exec.CommandContext(ctx, "systemsetup", "-settimezone", tz)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		msg := strings.TrimSpace(string(out))
+		if msg != "" {
+			return fmt.Errorf("system: set timezone: %w: %s", err, msg)
+		}
+		return fmt.Errorf("system: set timezone: %w", err)
+	}
+	return nil
+}
+
+func setTimezoneLinux(ctx context.Context, tz string) error {
+	// #nosec G204 -- fixed binary; tz is a single argv element
+	cmd := exec.CommandContext(ctx, "timedatectl", "set-timezone", tz)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		msg := strings.TrimSpace(string(out))
+		if msg != "" {
+			return fmt.Errorf("system: set timezone: %w: %s", err, msg)
+		}
+		return fmt.Errorf("system: set timezone: %w", err)
+	}
+	return nil
 }
 
 // ParseTzutilOutput trims `tzutil /g` output (Windows time zone ID).

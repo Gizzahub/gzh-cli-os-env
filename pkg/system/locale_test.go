@@ -71,3 +71,9 @@ func TestParseLocalectlStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestSetLocale_Empty(t *testing.T) {
+	if err := SetLocale(t.Context(), "  "); err == nil {
+		t.Fatal("expected error for empty locale")
+	}
+}
