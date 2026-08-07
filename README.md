@@ -10,7 +10,8 @@
 재구현 Phases 1–6 완료(2026-07-17). macOS + Linux(KDE/GNOME) + Windows 읽기
 경로와 설정 스냅샷 백업(`backup create|restore|diff`)이 있다. restore
 `--apply`는 locale/timezone write(macOS·Linux)를 지원하고, 미지원 도메인은
-skip+reason으로 보고한다. git remote sync는 후속 작업.
+skip+reason으로 보고한다. remote config sync는 `os-env sync status|push|pull
+--remote <local-dir>` (filesystem mirror; secret allowlist=manifest.json).
 
 ## 주요 기능
 
@@ -39,6 +40,9 @@ os-env backup restore -i snap.tar.gz
 os-env backup restore -i snap.tar.gz --apply --dry-run   # plan only
 os-env backup restore -i snap.tar.gz --apply             # locale/timezone write
 os-env backup diff --from snap.tar.gz
+os-env sync status --remote ~/dotfiles/os-env
+os-env sync push --remote ~/dotfiles/os-env [-i snap.tar.gz] [--dry-run]
+os-env sync pull --remote ~/dotfiles/os-env [-o snap.tar.gz] [--apply] [--dry-run]
 ```
 
 ## Library Usage
@@ -52,14 +56,15 @@ cmd := osenv.NewRootCmd()  // gzh-cli wrapper에서 사용
 ## Architecture
 
 ```
-cmd/os-env/          CLI entry point (NewRootCmd) + detect/power/system/display/shortcuts/input/backup
+cmd/os-env/          CLI entry point (NewRootCmd) + detect/power/system/display/shortcuts/input/backup/sync
 pkg/detector/        OS / 데스크톱 환경 감지
 pkg/power/           배터리 상태 (순수 파싱 + 플랫폼 dispatch)
 pkg/system/          hosts / locale / timezone
 pkg/display/         디스플레이 목록
 pkg/shortcuts/       단축키
 pkg/input/           키보드
-pkg/backup/          설정 스냅샷 create/restore/diff
+pkg/backup/          설정 스냅샷 create/restore/diff/apply
+pkg/cfgsync/         remote config push/pull/status (local-dir transport)
 ```
 
 ## Platform Support
@@ -75,6 +80,7 @@ pkg/backup/          설정 스냅샷 create/restore/diff
 | Input                      | ✅         | ✅      | ✅    | ✅      |
 | Backup (snapshot)          | ✅         | ✅      | ✅    | ✅      |
 | Backup apply (locale/tz)   | ✅         | ✅      | ✅    | unsupported set |
+| Sync (local remote dir)    | ✅         | ✅      | ✅    | ✅      |
 
 ## 개발
 

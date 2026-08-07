@@ -53,7 +53,11 @@ G3. **Platform backends**
 - 현재 **macOS + Linux(Phase 4) + Windows(Phase 5)**. Power·Display·locale/timezone·
   hosts list(read)·Shortcuts·Input 3-OS 읽기 경로; Backup snapshot create/restore/diff 완료.
   hosts는 플랫폼 기본 경로 읽기만 지원(Unix `/etc/hosts`, Windows
-  `%SystemRoot%\System32\drivers\etc\hosts`); add/remove 쓰기 API 없음
+  `%SystemRoot%\System32\drivers\etc\hosts`); add/remove 쓰기 API 없음.
+  **Remote config sync (minimal)**: `os-env sync status|push|pull --remote <local-dir>` —
+  로컬 디렉터리(git working tree 경로)에 backup archive를 mirror. 네트워크 git URL
+  직접 push/pull은 미지원(clone 후 local path 사용). pull 후 `--apply`는 unit-37
+  `backup.Apply` 재사용
 
 G4. **Pure-function separation**
 
@@ -98,11 +102,18 @@ ______________________________________________________________________
 
 **Safety**
 
-- 읽기 전용 명령이 기본이다. 쓰기 경로(`backup restore --apply`)는
+- 읽기 전용 명령이 기본이다. 쓰기 경로(`backup restore --apply`, `sync pull --apply`)는
   `--dry-run` 계획 확인을 지원하며, 미지원 도메인은 skip+reason으로 보고한다.
   locale/timezone set는 macOS·Linux만; Windows set는 unsupported 에러.
   권한 상승(sudo)은 호출하지 않는다 — 플랫폼 도구가 권한을 요구하면 실패를
   표면화한다.
+
+**Remote sync secret policy**
+
+- 동기화 페이로드는 backup archive 한 개뿐이며, archive 내부 allowlist는
+  `manifest.json` only (`pkg/cfgsync.AllowedArchiveEntries`).
+- 토큰·자격증명·env secret은 수집·커밋·원격 배치 대상이 아니다. push/pull은
+  allowlist 외 entry가 있으면 거부한다.
 
 **Baseline**
 

@@ -15,7 +15,7 @@ make check     # fmt + lint + test
 ```
 gzh-cli-os-env/
 ├── cmd/os-env/          # CLI entry point (NewRootCmd)
-│                        # detect/power/system/display/shortcuts/input/backup
+│                        # detect/power/system/display/shortcuts/input/backup/sync
 └── pkg/
     ├── detector/        # OS / desktop environment detection
     ├── power/           # Battery status (pure parser + platform dispatch)
@@ -23,7 +23,8 @@ gzh-cli-os-env/
     ├── display/         # Display list (pure parser + platform dispatch)
     ├── shortcuts/       # Symbolic hotkeys (pure parser + platform dispatch)
     ├── input/           # Keyboard repeat / input sources (pure parser + dispatch)
-    └── backup/          # Config snapshot create/restore/diff (tar.gz)
+    ├── backup/          # Config snapshot create/restore/diff/apply (tar.gz)
+    └── cfgsync/         # Remote config push/pull/status (local-dir transport)
 ```
 
 ## Key API
@@ -47,6 +48,7 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 | Input (keyboard) | ✅ (setxkbmap) | ✅ (gsettings) | ✅ | ✅ (WinUserLanguageList) |
 | Backup (snapshot) | ✅ | ✅ | ✅ | ✅ |
 | Backup apply (locale/tz) | ✅ | ✅ | ✅ | set unsupported |
+| Sync (local remote dir) | ✅ | ✅ | ✅ | ✅ |
 
 ## Module
 
@@ -54,8 +56,11 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 
 ## Status
 
-**Rebuild complete (Phases 1–6) + restore apply.** macOS/Linux/Windows read
-paths + backup create/restore/diff; `backup restore --apply` writes
-locale/timezone on macOS/Linux (injectable DomainWriter). Remote git sync is a
-follow-up. See `tasks/plan/GZH_CLI_OS_ENV.md` and
-`tasks/done/P2-os-env-rebuild-continue.md` in gzh-cli-devbox.
+**Rebuild complete (Phases 1–6) + restore apply + minimal remote sync.**
+macOS/Linux/Windows read paths + backup create/restore/diff; `backup restore
+--apply` writes locale/timezone on macOS/Linux (injectable DomainWriter).
+`os-env sync status|push|pull --remote <local-dir>` mirrors the backup archive
+(secret allowlist: `manifest.json` only). Network git URLs are not dialed
+directly — clone first, then pass the local path. See
+`tasks/plan/GZH_CLI_OS_ENV.md` and `tasks/done/P2-os-env-rebuild-continue.md`
+in gzh-cli-devbox.
