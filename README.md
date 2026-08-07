@@ -17,7 +17,8 @@ skip+reason으로 보고한다. git remote sync는 후속 작업.
 - **데스크톱 환경 감지** — macOS, Windows, KDE Plasma, GNOME (Linux는
   `XDG_CURRENT_DESKTOP` / `DESKTOP_SESSION` 기반)
 - **배터리 상태 조회** — macOS (`pmset`) · Linux (sysfs/upower)
-- **hosts 파일 조회** — `/etc/hosts` 파싱, macOS/Linux
+- **hosts 파일 조회** — 플랫폼 기본 hosts 경로 파싱 (Unix `/etc/hosts`, Windows
+  `%SystemRoot%\System32\drivers\etc\hosts`); 읽기 전용
 - **locale / timezone 조회** — macOS · Linux (LANG/localectl · localtime/timedatectl)
 - **디스플레이 목록 조회** — macOS · Linux (xrandr / wlr-randr)
 
@@ -29,7 +30,7 @@ gzh-cli wrapper(`gz os-env ...`)를 통해 노출될 구조다:
 ```bash
 os-env detect                # 현재 OS/데스크톱 환경 감지
 os-env power battery          # 배터리 상태 (macOS)
-os-env system hosts           # /etc/hosts 항목 목록
+os-env system hosts           # 시스템 hosts 항목 목록 (읽기 전용)
 os-env system locale          # 현재 locale (macOS)
 os-env system timezone        # 현재 timezone (macOS)
 os-env display list           # 연결된 디스플레이 목록
@@ -67,7 +68,7 @@ pkg/backup/          설정 스냅샷 create/restore/diff
 |---------------------------|------------|---------|-------|---------|
 | Detection                 | ✅         | ✅      | ✅    | ✅      |
 | Power                      | ✅ (sysfs)  | ✅ (sysfs) | ✅    | ✅      |
-| System (hosts)             | ✅         | ✅      | ✅    | planned |
+| System (hosts)             | ✅         | ✅      | ✅    | ✅ (read) |
 | System (locale/timezone)   | ✅         | ✅      | ✅    | ✅      |
 | Display                    | ✅ (xrandr) | ✅ (xrandr) | ✅    | ✅      |
 | Shortcuts                  | ✅         | ✅      | ✅    | ✅      |

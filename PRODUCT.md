@@ -3,7 +3,7 @@
 **Project**: gzh-cli-os-env (library — `NewRootCmd()`, 바이너리 없음)
 **Doc Type**: Goals + Constraints + Quality Gates
 **Status**: Active — **Rebuild complete (Phase 6/6)**
-**Last Updated**: 2026-07-17
+**Last Updated**: 2026-08-07
 
 ______________________________________________________________________
 
@@ -51,7 +51,9 @@ G3. **Platform backends**
 
 - Target: 각 도메인의 macOS·Linux(KDE/GNOME)·Windows 백엔드 완비
 - 현재 **macOS + Linux(Phase 4) + Windows(Phase 5)**. Power·Display·locale/timezone·
-  Shortcuts·Input 3-OS 읽기 경로; Backup snapshot create/restore/diff 완료
+  hosts list(read)·Shortcuts·Input 3-OS 읽기 경로; Backup snapshot create/restore/diff 완료.
+  hosts는 플랫폼 기본 경로 읽기만 지원(Unix `/etc/hosts`, Windows
+  `%SystemRoot%\System32\drivers\etc\hosts`); add/remove 쓰기 API 없음
 
 G4. **Pure-function separation**
 

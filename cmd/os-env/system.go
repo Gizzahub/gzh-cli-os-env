@@ -24,12 +24,18 @@ func newSystemCmd() *cobra.Command {
 func newSystemHostsCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "hosts",
-		Short: "List /etc/hosts entries",
-		Args:  cobra.NoArgs,
+		Short: "List system hosts file entries (read-only)",
+		Long: `List entries from the platform hosts file.
+
+Path: /etc/hosts on Unix; %SystemRoot%\System32\drivers\etc\hosts on Windows.
+This command is read-only; adding or removing hosts requires elevated privileges
+and is not supported here.`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			entries, err := system.GetHosts("/etc/hosts")
+			path := system.DefaultHostsPath()
+			entries, err := system.GetHosts(path)
 			if err != nil {
-				return err
+				return fmt.Errorf("read hosts %s: %w", path, err)
 			}
 			w := cmd.OutOrStdout()
 			for _, e := range entries {

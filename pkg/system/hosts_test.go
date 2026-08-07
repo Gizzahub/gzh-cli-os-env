@@ -3,7 +3,53 @@
 
 package system
 
-import "testing"
+import (
+	"runtime"
+	"strings"
+	"testing"
+)
+
+func TestDefaultHostsPath_CurrentGOOS(t *testing.T) {
+	path := DefaultHostsPath()
+	if path == "" {
+		t.Fatal("DefaultHostsPath() returned empty string")
+	}
+	switch runtime.GOOS {
+	case goosWindows:
+		if !strings.HasSuffix(strings.ToLower(path), `\system32\drivers\etc\hosts`) {
+			t.Errorf("DefaultHostsPath() = %q, want ...\\System32\\drivers\\etc\\hosts", path)
+		}
+	default:
+		if path != "/etc/hosts" {
+			t.Errorf("DefaultHostsPath() = %q, want /etc/hosts", path)
+		}
+	}
+}
+
+func TestDefaultHostsPath_WindowsWithSystemRoot(t *testing.T) {
+	got := hostsPathFor(goosWindows, `D:\WinRoot`)
+	want := `D:\WinRoot\System32\drivers\etc\hosts`
+	if got != want {
+		t.Errorf("hostsPathFor(windows, D:\\WinRoot) = %q, want %q", got, want)
+	}
+}
+
+func TestDefaultHostsPath_WindowsEmptySystemRoot(t *testing.T) {
+	got := hostsPathFor(goosWindows, "")
+	want := `C:\Windows\System32\drivers\etc\hosts`
+	if got != want {
+		t.Errorf("hostsPathFor(windows, \"\") = %q, want %q", got, want)
+	}
+}
+
+func TestDefaultHostsPath_Unix(t *testing.T) {
+	for _, goos := range []string{goosDarwin, goosLinux, "freebsd", "openbsd"} {
+		got := hostsPathFor(goos, `C:\Windows`) // SystemRoot must be ignored off Windows
+		if got != "/etc/hosts" {
+			t.Errorf("hostsPathFor(%q, ...) = %q, want /etc/hosts", goos, got)
+		}
+	}
+}
 
 func TestParseHosts(t *testing.T) {
 	in := `# Host Database

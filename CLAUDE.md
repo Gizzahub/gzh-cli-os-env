@@ -40,7 +40,7 @@ cmd := osenv.NewRootCmd()  // used by gzh-cli wrapper
 |---------|------------|-------|-------|---------|
 | Detection | ✅ | ✅ | ✅ | ✅ |
 | Power | ✅ (sysfs/upower) | ✅ (sysfs/upower) | ✅ | ✅ (wmic/CIM) |
-| System (hosts) | ✅ | ✅ | ✅ | planned |
+| System (hosts) | ✅ | ✅ | ✅ | ✅ (read) |
 | System (locale/timezone) | ✅ | ✅ | ✅ | ✅ |
 | Display | ✅ (xrandr/wlr) | ✅ (xrandr/wlr) | ✅ | ✅ (wmic) |
 | Shortcuts | ✅ (kglobalaccel) | ✅ (gsettings) | ✅ | ✅ (accessibility) |

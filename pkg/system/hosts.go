@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 // Package system reports and edits OS-level settings: hosts file, locale,
-// and timezone. Locale/timezone writes are supported on macOS and Linux;
+// and timezone. Hosts is read-only on all platforms (list via GetHosts +
+// DefaultHostsPath). Locale/timezone writes are supported on macOS and Linux;
 // Windows set paths return unsupported errors.
 package system
 
 import (
 	"os"
+	"runtime"
 	"strings"
 )
 
@@ -18,13 +20,41 @@ const (
 	goosWindows = "windows"
 )
 
-// HostsEntry is one parsed line of /etc/hosts: an IP and its hostnames.
+// defaultWindowsSystemRoot is used when SystemRoot is unset (unusual but possible).
+const defaultWindowsSystemRoot = `C:\Windows`
+
+// HostsEntry is one parsed line of a hosts file: an IP and its hostnames.
 type HostsEntry struct {
 	IP    string
 	Names []string
 }
 
-// ParseHosts parses the contents of an /etc/hosts file into entries.
+// DefaultHostsPath returns the platform hosts file path for the current OS.
+// On Windows it is %SystemRoot%\System32\drivers\etc\hosts (SystemRoot defaults
+// to C:\Windows when unset). On Unix-like systems it is /etc/hosts.
+// Listing is supported on all platforms that can read that path; this package
+// does not provide write (add/remove) APIs — hosts editing often needs elevated
+// privileges and is out of scope.
+func DefaultHostsPath() string {
+	return hostsPathFor(runtime.GOOS, os.Getenv("SystemRoot"))
+}
+
+// hostsPathFor is the pure path selector used by DefaultHostsPath.
+// goos is a runtime.GOOS value; systemRoot is Windows SystemRoot (may be empty).
+func hostsPathFor(goos, systemRoot string) string {
+	if goos == goosWindows {
+		root := systemRoot
+		if root == "" {
+			root = defaultWindowsSystemRoot
+		}
+		// Fixed Windows path segment; do not use filepath.Join so tests on
+		// non-Windows keep backslash separators.
+		return root + `\System32\drivers\etc\hosts`
+	}
+	return "/etc/hosts"
+}
+
+// ParseHosts parses the contents of a hosts file into entries.
 // Blank lines and lines whose first non-space character is '#' are
 // skipped. Lines without at least an IP and one hostname are skipped.
 // It is a pure function so the parsing logic can be tested anywhere.
@@ -48,7 +78,8 @@ func ParseHosts(content string) ([]HostsEntry, error) {
 	return entries, nil
 }
 
-// GetHosts reads and parses the system hosts file (path).
+// GetHosts reads and parses the system hosts file at path.
+// Prefer DefaultHostsPath() for the current platform's default location.
 func GetHosts(path string) ([]HostsEntry, error) {
 	// #nosec G304 -- reading a caller-chosen path is this function's contract;
 	// the caller, not this package, decides which hosts file to inspect.
