@@ -1,4 +1,4 @@
-# CLAUDE.md - gzh-cli-os-env
+# gzh-cli-os-env
 
 OS/Desktop Environment Configuration Library for gzh-cli ecosystem.
 
@@ -8,23 +8,6 @@ OS/Desktop Environment Configuration Library for gzh-cli ecosystem.
 make build     # Build
 make test      # Run tests
 make check     # fmt + lint + test
-```
-
-## Architecture
-
-```
-gzh-cli-os-env/
-├── cmd/os-env/          # CLI entry point (NewRootCmd)
-│                        # detect/power/system/display/shortcuts/input/backup/sync
-└── pkg/
-    ├── detector/        # OS / desktop environment detection
-    ├── power/           # Battery status (pure parser + platform dispatch)
-    ├── system/          # hosts / locale / timezone
-    ├── display/         # Display list (pure parser + platform dispatch)
-    ├── shortcuts/       # Symbolic hotkeys (pure parser + platform dispatch)
-    ├── input/           # Keyboard repeat / input sources (pure parser + dispatch)
-    ├── backup/          # Config snapshot create/restore/diff/apply (tar.gz)
-    └── cfgsync/         # Remote config push/pull/status (local-dir transport)
 ```
 
 ## Key API
