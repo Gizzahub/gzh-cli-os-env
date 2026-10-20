@@ -134,33 +134,30 @@ func printSnapshotInspect(w io.Writer, s *backup.Snapshot) error {
 }
 
 func printApplyResult(w io.Writer, result *backup.ApplyResult, dryRun bool) error {
+	label, domains := "Applied", result.Applied
 	if dryRun {
-		if len(result.Planned) == 0 {
-			if _, err := fmt.Fprintln(w, "Planned: (none)"); err != nil {
-				return err
-			}
-		} else {
-			for _, d := range result.Planned {
-				if _, err := fmt.Fprintf(w, "Planned: %s\n", d); err != nil {
-					return err
-				}
-			}
-		}
-	} else {
-		if len(result.Applied) == 0 {
-			if _, err := fmt.Fprintln(w, "Applied: (none)"); err != nil {
-				return err
-			}
-		} else {
-			for _, d := range result.Applied {
-				if _, err := fmt.Fprintf(w, "Applied: %s\n", d); err != nil {
-					return err
-				}
-			}
-		}
+		label, domains = "Planned", result.Planned
+	}
+	if err := printDomains(w, label, domains); err != nil {
+		return err
 	}
 	for _, sk := range result.Skipped {
 		if _, err := fmt.Fprintf(w, "Skipped: %s (%s)\n", sk.Domain, sk.Reason); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// printDomains writes one "<label>: <domain>" line per domain, or
+// "<label>: (none)" when there are none.
+func printDomains(w io.Writer, label string, domains []string) error {
+	if len(domains) == 0 {
+		_, err := fmt.Fprintf(w, "%s: (none)\n", label)
+		return err
+	}
+	for _, d := range domains {
+		if _, err := fmt.Fprintf(w, "%s: %s\n", label, d); err != nil {
 			return err
 		}
 	}
