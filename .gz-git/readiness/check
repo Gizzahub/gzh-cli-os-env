@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# gz-git readiness V1 → `ce validate readiness` 런처.
+#
+# 검사의 순서와 범위는 설치된 `ce`가 소유한다(ADR-0165). 이 파일은 `ce`와 그
+# 하위 명령이 있는지만 확인하고 인자를 그대로 넘긴다. 검사가 바뀌어도 이 파일은
+# 바뀌지 않는다.
+#
+# 인자(고정):
+#   --source-dir <path> --source-sha <sha> --target-sha <sha> --result-format json-v1
+# 출력: stdout에 JSON 한 줄, 진단은 stderr, 종료코드는 언제나 0.
+
+set -u
+
+unavailable() {
+  printf 'readiness: %s\n' "$1" >&2
+  printf '{"version":1,"status":"unavailable","summary":"stage=%s"}\n' "$2"
+  exit 0
+}
+
+command -v ce >/dev/null 2>&1 \
+  || unavailable 'ce is not on PATH' 'ce_unavailable'
+listing=$(ce validate --help 2>/dev/null) \
+  || unavailable 'ce validate --help failed' 'readiness_unavailable'
+[[ $'\n'$listing == *$'\n  readiness '* ]] \
+  || unavailable 'installed ce has no validate readiness; upgrade ce' 'readiness_unavailable'
+
+exec ce validate readiness "$@"

@@ -1,0 +1,14 @@
+# Repository identity and integration for `ce task run-*`; without this file
+# they stop with BLOCKED.
+#
+# Worktree placement comes from the global defaults (ce-devenv
+# `task-runtime-defaults.yaml` repository-layouts, family foundation), so this
+# file carries no worktree roots or host paths and is tracked.
+schema-version: 5
+repository-id: gzh-cli-os-env
+integration-provider: gz-git
+integration-network-policy: allow
+# run-finish runs this before calling gz-git, in a detached checkout of the
+# target so the task branch cannot replace its own judge. It is the canonical
+# launcher for `ce validate readiness` (ce-agent-kit templates/readiness/check).
+integration-judgment-runner: .gz-git/readiness/check
