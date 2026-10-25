@@ -1,0 +1,6 @@
+# gzh-cli-os-env keeps no task board: its cards live on the gzh-cli-devbox
+# board. `ce task gate` answers this declaration with ready
+# (task_board_declared_absent) while no tasks/ directory exists.
+task-board:
+  schema-version: 1
+  presence: none
