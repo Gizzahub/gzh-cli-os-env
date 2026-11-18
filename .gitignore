@@ -17,3 +17,6 @@ coverage.html
 !/.ce/
 /.ce/*
 !/.ce/task-runtime.yaml
+
+# Task cards live in the gzh-cli-devbox board (user decision 2026-11-18).
+/tasks/
