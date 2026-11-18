@@ -63,6 +63,7 @@ macOS/Linux/Windows read paths + backup create/restore/diff; `backup restore
 --apply` writes locale/timezone on macOS/Linux (injectable DomainWriter).
 `os-env sync status|push|pull --remote <local-dir>` mirrors the backup archive
 (secret allowlist: `manifest.json` only). Network git URLs are not dialed
-directly — clone first, then pass the local path. See
-`tasks/plan/GZH_CLI_OS_ENV.md` and `tasks/done/P2-os-env-rebuild-continue.md`
-in gzh-cli-devbox.
+directly — clone first, then pass the local path. The rebuild plan and
+card were retired from the gzh-cli-devbox board in `ade1c0d` (2026-09-12);
+read them from its history: `tasks/_archive/plan/GZH_CLI_OS_ENV.md` and
+`tasks/_archive/P2-os-env-rebuild-continue.md` at `ade1c0d^`.
